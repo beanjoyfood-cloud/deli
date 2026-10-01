@@ -220,6 +220,80 @@ tr:hover td{background:#f8fafd;}
 .modal h3{font-size:16px;font-weight:700;margin:0 0 14px;color:var(--ink);}
 .modal .field{margin-bottom:12px;}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
+
+/* ===== 庫存總表 ===== */
+.masthead-actions{margin-top:12px;}
+.sum-backdrop{
+  position:fixed;inset:0;background:rgba(21,38,61,0.55);z-index:60;
+  display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:24px 16px 40px;
+}
+.sum-toolbar{
+  width:100%;max-width:860px;background:var(--panel);border-radius:10px;
+  padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-bottom:14px;box-shadow:0 4px 14px rgba(21,38,61,0.18);
+}
+.sum-langs{display:flex;gap:6px;flex-wrap:wrap;}
+.sum-lang{
+  padding:7px 14px;border:1px solid var(--line-strong);border-radius:6px;background:var(--panel);
+  cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-soft);
+}
+.sum-lang.sel{background:var(--accent);border-color:var(--accent);color:#fff;}
+.sum-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.sum-zero{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:5px;cursor:pointer;}
+.sum-sheet{
+  width:100%;max-width:860px;background:#fff;border-radius:4px;
+  padding:48px 46px 32px;color:var(--ink);box-shadow:0 8px 28px rgba(21,38,61,0.25);
+  display:flex;flex-direction:column;min-height:600px;
+}
+.sum-sheet[lang="vi"]{font-family:'Noto Sans','IBM Plex Sans TC',sans-serif;}
+.sum-sheet[lang="th"]{font-family:'Noto Sans Thai','Noto Sans','IBM Plex Sans TC',sans-serif;}
+.sum-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding-bottom:16px;border-bottom:2px solid var(--accent);}
+.sum-factory{font-size:12px;color:var(--ink-soft);}
+.sum-title{margin:2px 0 0;font-size:26px;font-weight:700;line-height:1.2;}
+.sum-asof{display:flex;flex-direction:column;align-items:flex-end;gap:2px;padding:8px 14px;border:1px solid var(--line-strong);border-radius:6px;}
+.sum-asof .l{font-size:11px;color:var(--ink-soft);}
+.sum-asof .v{font-size:16px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.sum-grid{display:grid;grid-template-columns:minmax(0,1fr) 240px 120px;gap:12px;align-items:center;padding:8px 12px;}
+.sum-colhead{font-size:11.5px;font-weight:600;color:var(--ink-soft);border-bottom:1px solid var(--line-strong);padding-top:14px;}
+.sum-cat{
+  display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-top:14px;
+  background:var(--tag-bg);border-top:2px solid var(--accent);
+}
+.sum-cat .n{font-size:13px;font-weight:700;color:var(--accent-dark);}
+.sum-cat .c{font-size:11.5px;color:var(--ink-soft);}
+.sum-row{font-size:13px;border-bottom:1px dashed var(--line);}
+.sum-row.last{border-bottom:1px solid var(--line-strong);}
+.sum-name{display:flex;gap:8px;align-items:baseline;}
+.sum-code{font-size:10.5px;color:var(--ink-soft);min-width:34px;font-variant-numeric:tabular-nums;}
+.sum-date{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-variant-numeric:tabular-nums;}
+.sum-qty{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;}
+.sum-tag{font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:3px;white-space:nowrap;}
+.sum-warn .sum-date{color:#b45309;}
+.sum-warn .sum-tag{color:#b45309;background:#fdf1e4;}
+.sum-exp .sum-date{color:#b42318;}
+.sum-exp .sum-tag{color:#b42318;background:#fdecea;}
+.sum-empty{padding:30px 12px;color:var(--ink-soft);text-align:center;}
+.sum-foot{
+  margin-top:auto;padding-top:12px;border-top:1px solid var(--line-strong);
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft);
+}
+.sum-spacer{flex-grow:1;min-height:24px;}
+@media (max-width:640px){
+  .sum-sheet{padding:28px 18px 20px;}
+  .sum-grid{grid-template-columns:minmax(0,1fr) 120px 90px;gap:8px;}
+  .sum-head{flex-direction:column;align-items:flex-start;}
+  .sum-asof{align-items:flex-start;}
+}
+@media print{
+  @page{size:A4 portrait;margin:12mm;}
+  body.printing-summary > *:not(#summaryRoot){display:none !important;}
+  body.printing-summary{background:#fff;}
+  body.printing-summary .sum-backdrop{position:static;background:none;padding:0;overflow:visible;display:block;}
+  body.printing-summary .sum-toolbar{display:none;}
+  body.printing-summary .sum-sheet{max-width:none;box-shadow:none;padding:0;min-height:0;border-radius:0;}
+  body.printing-summary .sum-row,body.printing-summary .sum-cat{break-inside:avoid;}
+  body.printing-summary .sum-cat,body.printing-summary .sum-tag{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
 </style>
 </head>
 <body>
@@ -557,7 +631,7 @@ const ITEM_IMAGES = {
   '麻油米Q糕': 'mayou-miq-gao.jpg',
   '麻辣米Q糕': 'malayoumiq-gao.jpg',
   '豆蔬蛋白捲30入': 'doushu-danbaijuan-30.jpg',
-  '禾豐-黃豆干絲': 'hefeng-huangdougansi.jpg',
+  '禾豐-黃豆干絲': 'efeng-huangdougansi.jpg',
   '禾豐-小油豆腐丁': 'hefeng-xiaoyoudoufuding.jpg',
   '禾豐-百頁切丁': 'hefeng-baiyeqieding.jpg',
   '烤麩': 'caofu.png',
@@ -717,6 +791,7 @@ function render(){
       <div>
         <h1>${t('appTitle')}</h1>
         <div class="sub">${t('appSubtitle')}</div>
+        <div class="masthead-actions"><button class="btn sm" id="summaryBtn">${SUM_UI.btn}</button></div>
       </div>
       <div class="stat-row">
         <div class="stat"><div class="num mono">${items.length}</div><div class="label">${t('statItems')}</div></div>
@@ -760,6 +835,9 @@ function render(){
   document.getElementById('addItemLink').addEventListener('click', ()=>{
     showAddItemModal = true; renderAddItemModal();
   });
+  document.getElementById('summaryBtn').addEventListener('click', ()=>{
+    showSummary = true; renderSummaryModal();
+  });
   document.getElementById('manageItemLink').addEventListener('click', ()=>{
     showManageModal = true; renderManageModal();
   });
@@ -774,6 +852,7 @@ function render(){
   renderAddItemModal();
   renderManageModal();
   renderEditTxModal();
+  renderSummaryModal();
 }
 
 function renderItemList(items){
@@ -1125,6 +1204,250 @@ function renderBatchTab(){
   document.getElementById('clearSelBtn').addEventListener('click', ()=>{
     selectedItem = null; render();
   });
+}
+
+/* ================= 庫存總表（三語） ================= */
+let showSummary = false;
+let summaryLang = 'zh';
+let summaryIncludeZero = false;
+
+const SUM_TEXT = {
+  zh:{tab:'中文', factory:'德利廠', title:'庫存總表', asof:'截至',
+      cols:['品名','有效日期','數量'], noExpiry:'未填效期',
+      near:'即將到期', lt20:'效期小於20天', eq20:'效期剩餘20天', exp:'已過期',
+      cnt:n=>`${n} 項`, summary:(a,b)=>`共 ${a} 項品項，${b} 筆效期批次`,
+      made:s=>`製表時間 ${s}`, empty:'目前沒有庫存。', sheet:'中文'},
+  vi:{tab:'Tiếng Việt', factory:'Xưởng Đức Lợi', title:'Bảng tổng hợp tồn kho', asof:'Tính đến',
+      cols:['Tên mặt hàng','Hạn sử dụng','Số lượng'], noExpiry:'Chưa nhập hạn sử dụng',
+      near:'Sắp hết hạn', lt20:'Hạn dùng dưới 20 ngày', eq20:'Hạn dùng còn 20 ngày', exp:'Đã hết hạn',
+      cnt:n=>`${n} mặt hàng`, summary:(a,b)=>`Tổng cộng ${a} mặt hàng, ${b} lô theo hạn sử dụng`,
+      made:s=>`Lập bảng lúc ${s}`, empty:'Hiện không có hàng tồn kho.', sheet:'Tiếng Việt'},
+  th:{tab:'ภาษาไทย', factory:'โรงงานเต๋อลี่', title:'สรุปสต๊อกสินค้าคงคลัง', asof:'ณ วันที่',
+      cols:['ชื่อสินค้า','วันหมดอายุ','จำนวน'], noExpiry:'ยังไม่ได้กรอกวันหมดอายุ',
+      near:'ใกล้หมดอายุ', lt20:'อายุคงเหลือน้อยกว่า 20 วัน', eq20:'อายุคงเหลือ 20 วัน', exp:'หมดอายุแล้ว',
+      cnt:n=>`${n} รายการ`, summary:(a,b)=>`รวม ${a} รายการ ${b} ล็อตตามวันหมดอายุ`,
+      made:s=>`จัดทำเมื่อ ${s}`, empty:'ไม่มีสินค้าคงคลังในขณะนี้', sheet:'ภาษาไทย'}
+};
+const SUM_UI = {
+  btn:'庫存總表 / Bảng tổng hợp tồn kho / สรุปสต๊อก',
+  zero:'含零庫存品項 / Gồm hàng tồn 0 / รวมรายการที่ไม่มีสต๊อก',
+  excel:'匯出 Excel / Xuất Excel / ส่งออก Excel',
+  print:'列印・PDF / In・PDF / พิมพ์・PDF',
+  close:'關閉 / Đóng / ปิด',
+  excelFail:'Excel 匯出元件載入失敗，請確認網路連線。'
+};
+const SUM_NEAR_DAYS = 30;      /* 一般品項：30 天內標示「即將到期」 */
+const LAODOUFU_MIN_DAYS = 20;  /* 老豆腐：出貨效期必須大於 20 天 */
+
+function isLaoDoufu(name){ return String(name||'').indexOf('老豆腐') !== -1; }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function localToday(){ const d=new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function parseExpiry(s){
+  const m = String(s||'').trim().match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
+  if(!m) return null;
+  const d = new Date(+m[1], +m[2]-1, +m[3]);
+  return isNaN(d) ? null : d;
+}
+function fmtSumDate(d, lg){
+  return lg==='zh' ? `${d.getFullYear()}/${pad2(d.getMonth()+1)}/${pad2(d.getDate())}`
+                   : `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`;
+}
+function fmtSumStamp(d, lg){ return `${fmtSumDate(d, lg)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
+function sumItemName(name, lg){
+  if(lg==='zh') return name;
+  const tr = ITEM_TRANSLATIONS[name];
+  return (tr && tr[lg]) ? tr[lg] : name;
+}
+function sumCatName(cat, lg){
+  const tr = CATEGORY_TRANSLATIONS[cat];
+  let base = (lg!=='zh' && tr && tr[lg]) ? tr[lg] : cat;
+  const ann = CATEGORY_ANNOTATIONS[cat];
+  if(ann && T[lg] && T[lg][ann]) base += `（${T[lg][ann]}）`;
+  return base;
+}
+function sumUnit(u, lg){ const e = UNIT_LABELS[u]; return e ? e[lg] : (u||''); }
+
+/* 依效期狀態決定標示：exp 已過期 / lt20 / eq20（老豆腐）/ near（一般品項） */
+function expiryStatus(name, dateObj, today){
+  if(!dateObj) return null;
+  const days = Math.round((dateObj - today) / 86400000);
+  if(days < 0) return 'exp';
+  if(isLaoDoufu(name)){
+    if(days < LAODOUFU_MIN_DAYS) return 'lt20';
+    if(days === LAODOUFU_MIN_DAYS) return 'eq20';
+    return null;
+  }
+  return days <= SUM_NEAR_DAYS ? 'near' : null;
+}
+
+/* 整理總表資料（與語言無關） */
+function buildSummaryData(){
+  const today = localToday();
+  const items = itemsWithStock();
+  const groups = [];
+  let itemCount = 0, batchCount = 0;
+  categoryOrder().forEach(cat=>{
+    const rows = [];
+    items.filter(i=>i.category===cat).forEach(i=>{
+      const map = {};
+      transactions.filter(tx=>tx.item===i.name).forEach(tx=>{
+        const key = tx.batch || '';
+        if(!map[key]) map[key] = {bal:0, units:{}};
+        map[key].bal += (tx.type==='in' ? tx.qty : -tx.qty);
+        if(tx.unit) map[key].units[tx.unit] = true;
+      });
+      let batches = Object.keys(map).filter(k=>map[k].bal!==0).map(k=>{
+        const d = parseExpiry(k);
+        const units = Object.keys(map[k].units);
+        return {raw:k, date:d, qty:map[k].bal, unit: units.length===1 ? units[0] : (i.unit||units[0]||''),
+                status: expiryStatus(i.name, d, today)};
+      });
+      batches.sort((a,b)=>{
+        if(!a.date && !b.date) return a.raw.localeCompare(b.raw);
+        if(!a.date) return 1; if(!b.date) return -1;
+        return a.date - b.date;
+      });
+      if(batches.length===0){
+        if(!summaryIncludeZero) return;
+        batches = [{raw:'', date:null, qty:0, unit:i.unit||'', status:null, zero:true}];
+      }else{
+        batchCount += batches.length;
+      }
+      itemCount++;
+      rows.push({name:i.name, code:ITEM_CODES[i.name]||'', batches});
+    });
+    if(rows.length) groups.push({cat, rows});
+  });
+  return {groups, itemCount, batchCount, now:new Date()};
+}
+
+function sumDateText(b, lg){
+  if(b.zero) return '—';
+  if(b.date) return fmtSumDate(b.date, lg);
+  return b.raw ? b.raw : SUM_TEXT[lg].noExpiry;
+}
+function sumQtyText(b, lg){ return `${b.qty}${b.unit ? ' '+sumUnit(b.unit, lg) : ''}`; }
+
+function summarySheetHtml(data, lg){
+  const tx = SUM_TEXT[lg];
+  let body = '';
+  if(data.groups.length===0){
+    body = `<div class="sum-empty">${escapeHtml(tx.empty)}</div>`;
+  }
+  data.groups.forEach(g=>{
+    body += `<div class="sum-cat"><span class="n">${escapeHtml(sumCatName(g.cat, lg))}</span><span class="c">${escapeHtml(tx.cnt(g.rows.length))}</span></div>`;
+    g.rows.forEach(r=>{
+      r.batches.forEach((b, idx)=>{
+        const cls = b.status==='exp' ? 'sum-exp' : (b.status ? 'sum-warn' : '');
+        const last = idx===r.batches.length-1 ? 'last' : '';
+        const name = idx===0 ? `<span class="sum-code">${escapeHtml(r.code)}</span><span style="font-weight:500;">${escapeHtml(sumItemName(r.name, lg))}</span>` : '';
+        const tag = b.status ? `<span class="sum-tag">${escapeHtml(tx[b.status])}</span>` : '';
+        body += `<div class="sum-grid sum-row ${cls} ${last}">
+          <div class="sum-name">${name}</div>
+          <div class="sum-date">${escapeHtml(sumDateText(b, lg))}${tag}</div>
+          <div class="sum-qty ${b.qty<0?'neg':''}" ${b.qty<0?'style="color:var(--out)"':''}>${escapeHtml(sumQtyText(b, lg))}</div>
+        </div>`;
+      });
+    });
+  });
+  const stamp = fmtSumStamp(data.now, lg);
+  return `
+    <div class="sum-sheet" lang="${HTML_LANG_TAGS[lg]}">
+      <div class="sum-head">
+        <div><div class="sum-factory">${escapeHtml(tx.factory)}</div><h2 class="sum-title">${escapeHtml(tx.title)}</h2></div>
+        <div class="sum-asof"><span class="l">${escapeHtml(tx.asof)}</span><span class="v">${escapeHtml(stamp)}</span></div>
+      </div>
+      <div class="sum-grid sum-colhead"><div>${escapeHtml(tx.cols[0])}</div><div>${escapeHtml(tx.cols[1])}</div><div style="text-align:right;">${escapeHtml(tx.cols[2])}</div></div>
+      ${body}
+      <div class="sum-spacer"></div>
+      <div class="sum-foot"><span>${escapeHtml(tx.summary(data.itemCount, data.batchCount))}</span><span>${escapeHtml(tx.made(stamp))}</span></div>
+    </div>`;
+}
+
+function renderSummaryModal(){
+  const old = document.getElementById('summaryRoot');
+  if(old) old.remove();
+  if(!showSummary) return;
+  const data = buildSummaryData();
+  const root = document.createElement('div');
+  root.id = 'summaryRoot';
+  root.innerHTML = `
+    <div class="sum-backdrop" id="sumBackdrop">
+      <div class="sum-toolbar">
+        <div class="sum-langs">
+          ${['zh','vi','th'].map(lg=>`<button class="sum-lang ${summaryLang===lg?'sel':''}" data-lg="${lg}">${SUM_TEXT[lg].tab}</button>`).join('')}
+        </div>
+        <div class="sum-actions">
+          <label class="sum-zero"><input type="checkbox" id="sumZero" ${summaryIncludeZero?'checked':''}>${SUM_UI.zero}</label>
+          <button class="btn sm" id="sumExcel">${SUM_UI.excel}</button>
+          <button class="btn sm" id="sumPrint">${SUM_UI.print}</button>
+          <button class="btn ghost sm" id="sumClose">${SUM_UI.close}</button>
+        </div>
+      </div>
+      ${summarySheetHtml(data, summaryLang)}
+    </div>`;
+  document.body.appendChild(root);
+
+  root.querySelectorAll('.sum-lang').forEach(b=>b.addEventListener('click', ()=>{ summaryLang = b.dataset.lg; renderSummaryModal(); }));
+  document.getElementById('sumZero').addEventListener('change', e=>{ summaryIncludeZero = e.target.checked; renderSummaryModal(); });
+  document.getElementById('sumClose').addEventListener('click', ()=>{ showSummary = false; renderSummaryModal(); });
+  document.getElementById('sumBackdrop').addEventListener('click', e=>{ if(e.target.id==='sumBackdrop'){ showSummary = false; renderSummaryModal(); } });
+  document.getElementById('sumPrint').addEventListener('click', ()=>{
+    document.body.classList.add('printing-summary');
+    const done = ()=>{ document.body.classList.remove('printing-summary'); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    window.print();
+    setTimeout(done, 1000);
+  });
+  document.getElementById('sumExcel').addEventListener('click', ()=>exportSummaryExcel(buildSummaryData()));
+}
+
+/* Excel：一個檔案、三個工作表（中文 / Tiếng Việt / ภาษาไทย） */
+function loadXlsxLib(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = ()=>resolve(window.XLSX);
+    s.onerror = ()=>reject(new Error('load failed'));
+    document.head.appendChild(s);
+  });
+}
+async function exportSummaryExcel(data){
+  let XLSX;
+  try{ XLSX = await loadXlsxLib(); }catch(e){ showToast(SUM_UI.excelFail); return; }
+  const wb = XLSX.utils.book_new();
+  ['zh','vi','th'].forEach(lg=>{
+    const tx = SUM_TEXT[lg];
+    const stamp = fmtSumStamp(data.now, lg);
+    const aoa = [
+      [`${tx.factory}　${tx.title}`],
+      [`${tx.asof} ${stamp}`],
+      [],
+      tx.cols
+    ];
+    const merges = [{s:{r:0,c:0},e:{r:0,c:2}}, {s:{r:1,c:0},e:{r:1,c:2}}];
+    data.groups.forEach(g=>{
+      merges.push({s:{r:aoa.length,c:0},e:{r:aoa.length,c:2}});
+      aoa.push([`【${sumCatName(g.cat, lg)}】 ${tx.cnt(g.rows.length)}`]);
+      g.rows.forEach(r=>{
+        r.batches.forEach((b, idx)=>{
+          const name = idx===0 ? `${r.code?r.code+' ':''}${sumItemName(r.name, lg)}` : '';
+          const date = sumDateText(b, lg) + (b.status ? `（${tx[b.status]}）` : '');
+          aoa.push([name, date, sumQtyText(b, lg)]);
+        });
+      });
+    });
+    aoa.push([]);
+    aoa.push([tx.summary(data.itemCount, data.batchCount)]);
+    aoa.push([tx.made(stamp)]);
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{wch: lg==='zh'?34:48}, {wch:34}, {wch:16}];
+    ws['!merges'] = merges;
+    XLSX.utils.book_append_sheet(wb, ws, tx.sheet);
+  });
+  const d = data.now;
+  XLSX.writeFile(wb, `德利廠庫存總表_${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}_${pad2(d.getHours())}${pad2(d.getMinutes())}.xlsx`);
 }
 
 /* ================= ADD ITEM MODAL ================= */

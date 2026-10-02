@@ -631,7 +631,7 @@ const ITEM_IMAGES = {
   '麻油米Q糕': 'mayou-miq-gao.jpg',
   '麻辣米Q糕': 'malayoumiq-gao.jpg',
   '豆蔬蛋白捲30入': 'doushu-danbaijuan-30.jpg',
-  '禾豐-黃豆干絲': 'hefeng-huangdougansi.jpg',
+  '禾豐-黃豆干絲': 'efeng-huangdougansi.jpg',
   '禾豐-小油豆腐丁': 'hefeng-xiaoyoudoufuding.jpg',
   '禾豐-百頁切丁': 'hefeng-baiyeqieding.jpg',
   '烤麩': 'caofu.png',
@@ -781,6 +781,10 @@ function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'
 const HTML_LANG_TAGS = {zh:'zh-Hant-TW', vi:'vi', th:'th'};
 
 function render(){
+  /* 記住左側品項清單與整頁的捲動位置，重繪後還原，避免跳回最頂端 */
+  const prevListEl = document.getElementById('itemList');
+  const prevListScroll = prevListEl ? prevListEl.scrollTop : 0;
+  const prevWinScroll = window.scrollY;
   document.documentElement.lang = HTML_LANG_TAGS[lang] || 'zh-Hant-TW';
   const items = itemsWithStock();
   const totalStock = items.reduce((s,i)=>s+i.stock,0);
@@ -828,6 +832,7 @@ function render(){
   `;
 
   renderItemList(items);
+  document.getElementById('itemList').scrollTop = prevListScroll;
   document.getElementById('itemSearch').addEventListener('input', e=>{
     window.__itemSearchVal = e.target.value;
     renderItemList(items);
@@ -853,6 +858,7 @@ function render(){
   renderManageModal();
   renderEditTxModal();
   renderSummaryModal();
+  window.scrollTo(0, prevWinScroll);
 }
 
 function renderItemList(items){

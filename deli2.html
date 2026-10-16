@@ -294,6 +294,11 @@ tr:hover td{background:#f8fafd;}
   body.printing-summary .sum-row,body.printing-summary .sum-cat{break-inside:avoid;}
   body.printing-summary .sum-cat,body.printing-summary .sum-tag{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
+
+/* ===== 分頁切換 ===== */
+.pager{display:flex;justify-content:center;align-items:center;gap:10px;margin:12px 0;flex-wrap:wrap;}
+.pager .pg-info{font-size:12.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+.pager .btn[disabled]{background:#d5dde8;color:#fff;cursor:not-allowed;}
 </style>
 </head>
 <body>
@@ -1052,6 +1057,41 @@ function renderEntryTab(){
 }
 
 /* ================= LOG TAB ================= */
+/* ================= 分頁（每頁 10 筆） ================= */
+const PAGE_SIZE = 10;
+const pages = {log:1, batchAll:1, batchDetail:1};
+let lastBatchItem = null;
+const PAGER_TXT = {
+  prev:'‹ 上一頁 / Trang trước / ก่อนหน้า',
+  next:'下一頁 › / Trang sau / ถัดไป',
+  info:(p,n)=>`第 ${p} / ${n} 頁 / Trang ${p}/${n} / หน้า ${p}/${n}`
+};
+function paginate(rows, key){
+  const total = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  if(pages[key] > total) pages[key] = total;
+  if(pages[key] < 1) pages[key] = 1;
+  const start = (pages[key]-1) * PAGE_SIZE;
+  return {list: rows.slice(start, start+PAGE_SIZE), page: pages[key], total};
+}
+function pagerHtml(key, pg){
+  if(pg.total <= 1) return '';
+  return `<div class="pager">
+    <button class="btn ghost sm" data-pg="${key}" data-dir="-1" ${pg.page<=1?'disabled':''}>${PAGER_TXT.prev}</button>
+    <span class="pg-info">${PAGER_TXT.info(pg.page, pg.total)}</span>
+    <button class="btn ghost sm" data-pg="${key}" data-dir="1" ${pg.page>=pg.total?'disabled':''}>${PAGER_TXT.next}</button>
+  </div>`;
+}
+function bindPager(container, rerender){
+  container.querySelectorAll('[data-pg]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      pages[b.dataset.pg] += Number(b.dataset.dir);
+      rerender();
+      const tabs = document.querySelector('.tabs');
+      if(tabs && tabs.getBoundingClientRect().top < 0) tabs.scrollIntoView({block:'start'});
+    });
+  });
+}
+
 function renderLogTab(){
   const body = document.getElementById('tabBody');
   const cats = categoryOrder();
@@ -1060,6 +1100,7 @@ function renderLogTab(){
     .filter(t=> !logFilterCategory || (itemsMaster.find(i=>i.name===t.item)||{}).category===logFilterCategory)
     .slice()
     .sort((a,b)=> (b.date+b.createdAt).localeCompare(a.date+a.createdAt));
+  const pg = paginate(rows, 'log');
 
   body.innerHTML = `
     <div class="filter-row">
@@ -1075,6 +1116,7 @@ function renderLogTab(){
       </div>
       <span style="font-size:12px;color:var(--ink-soft);">${t('countRows', {n: rows.length})}</span>
     </div>
+    ${pagerHtml('log', pg)}
     <div class="table-wrap">
     <table>
       <thead><tr>
@@ -1083,7 +1125,7 @@ function renderLogTab(){
       </tr></thead>
       <tbody>
         ${rows.length===0 ? `<tr><td colspan="12" style="color:var(--ink-soft);padding:24px 10px;">${t('noTx')}</td></tr>` :
-        rows.map(t2=>{
+        pg.list.map(t2=>{
           const cat = (itemsMaster.find(i=>i.name===t2.item)||{}).category || '';
           return `
           <tr>
@@ -1107,13 +1149,15 @@ function renderLogTab(){
       </tbody>
     </table>
     </div>
+    ${pagerHtml('log', pg)}
   `;
+  bindPager(body, renderLogTab);
 
   document.getElementById('logCatFilter').addEventListener('change', e=>{
-    logFilterCategory = e.target.value; logFilterItem=''; renderLogTab();
+    logFilterCategory = e.target.value; logFilterItem=''; pages.log = 1; renderLogTab();
   });
   document.getElementById('logFilter').addEventListener('change', e=>{
-    logFilterItem = e.target.value; renderLogTab();
+    logFilterItem = e.target.value; pages.log = 1; renderLogTab();
   });
   body.querySelectorAll('.del-btn').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
@@ -1144,15 +1188,20 @@ function renderBatchTab(){
   const cats = categoryOrder();
 
   if(!selectedItem){
+    const ordered = [];
+    cats.forEach(cat=>{ items.filter(i=>i.category===cat).forEach(i=>ordered.push({cat, i})); });
+    const pg = paginate(ordered, 'batchAll');
     let html = `<div style="margin-bottom:14px;color:var(--ink-soft);font-size:13px;">${t('batchIntro')}</div>`;
+    html += pagerHtml('batchAll', pg);
     html += `<div class="table-wrap"><table><thead><tr><th>${t('colCategory')}</th><th>${t('colItem')}</th><th>${t('colCurrentStock')}</th><th>${t('colUnit')}</th></tr></thead><tbody>`;
-    cats.forEach(cat=>{
-      items.filter(i=>i.category===cat).forEach(i=>{
+    pg.list.forEach(({cat, i})=>{
         html += `<tr data-item="${escapeAttr(i.name)}" style="cursor:pointer;"><td><span class="cat-tag">${escapeHtml(categoryDisplayName(cat))}</span></td><td>${escapeHtml(itemDisplayName(i.name))}</td><td class="qty-cell mono">${fmtQty(i.stock)}</td><td class="mono">${escapeHtml(unitLabel(i.unit))||'—'}</td></tr>`;
-      });
+
     });
     html += `</tbody></table></div>`;
+    html += pagerHtml('batchAll', pg);
     body.innerHTML = html;
+    bindPager(body, renderBatchTab);
     body.querySelectorAll('tr[data-item]').forEach(row=>{
       row.addEventListener('click', ()=>{ selectedItem = row.dataset.item; render(); });
     });
@@ -1171,6 +1220,8 @@ function renderBatchTab(){
     if(tx.unit) batchMap[key].units[tx.unit]=true;
   });
   const batchRows = Object.keys(batchMap).sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+  if(lastBatchItem !== selectedItem){ pages.batchDetail = 1; lastBatchItem = selectedItem; }
+  const pg = paginate(batchRows, 'batchDetail');
   const currentStock = itemTx.reduce((s,tx)=>s+(tx.type==='in'?tx.qty:-tx.qty),0);
   const currentUnit = unitOfItem(selectedItem);
 
@@ -1185,12 +1236,13 @@ function renderBatchTab(){
       </div>
       <button class="btn ghost sm" id="clearSelBtn">${t('backToAll')}</button>
     </div>
+    ${pagerHtml('batchDetail', pg)}
     <div class="table-wrap">
     <table>
       <thead><tr><th>${t('fieldExpiry')}</th><th>${t('colBatchIn')}</th><th>${t('colBatchOut')}</th><th>${t('colBalanceShort')}</th><th>${t('colUnit')}</th><th>${t('colLastDate')}</th><th>${t('colOutCat')}</th></tr></thead>
       <tbody>
         ${batchRows.length===0 ? `<tr><td colspan="7" style="color:var(--ink-soft);padding:20px 10px;">${t('noBatchTx')}</td></tr>` :
-        batchRows.map(b=>{
+        pg.list.map(b=>{
           const d = batchMap[b];
           const bal = d.in - d.out;
           return `<tr>
@@ -1206,7 +1258,9 @@ function renderBatchTab(){
       </tbody>
     </table>
     </div>
+    ${pagerHtml('batchDetail', pg)}
   `;
+  bindPager(body, renderBatchTab);
   document.getElementById('clearSelBtn').addEventListener('click', ()=>{
     selectedItem = null; render();
   });
